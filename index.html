@@ -7,27 +7,25 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; padding: 20px; display: flex; flex-direction: column; height: 100dvh; }
-    h3 { font-size: 26px; text-align: center; color: #1e293b; margin-bottom: 12px; }
-    .status-badge { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #e0f2fe; color: #0369a1; transition: all 0.3s; }
-    .status-badge.connected { background: #dcfce7; color: #15803d; }
+    h3 { font-size: 24px; text-align: center; color: #1e293b; margin-bottom: 12px; }
+    .status-badge { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #dcfce7; color: #15803d; }
     .cgv-box { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; line-height: 1.3; }
     .cgv-box input { width: 30px; height: 30px; accent-color: #00E676; flex-shrink: 0; }
     .canvas-box { position: relative; width: 100%; flex: 1; min-height: 200px; margin-bottom: 15px; }
     canvas { width: 100%; height: 100%; border: 3px dashed #00E676; border-radius: 12px; background: #fff; touch-action: none; }
     .btn-group { display: flex; gap: 12px; }
-    button { padding: 16px; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; }
+    button { padding: 16px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
     .btn-clear { background: #e2e8f0; color: #334155; flex: 1; }
-    .btn-submit { background: #00E676; color: white; flex: 2; box-shadow: 0 4px 10px rgba(0, 230, 118, 0.3); transition: all 0.2s; }
-    .btn-submit:disabled { opacity: 0.4; box-shadow: none; }
+    .btn-submit { background: #00E676; color: white; flex: 2; box-shadow: 0 4px 10px rgba(0, 230, 118, 0.3); }
+    .btn-submit:disabled { opacity: 0.5; }
     #success-view { display: none; text-align: center; margin: auto; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
   <div id="form-container" style="display:flex; flex-direction:column; height:100%;">
     <h3>Signature du Contrat</h3>
-    <div id="conn-status" class="status-badge">⏳ Connexion au PC d'accueil...</div>
+    <div id="conn-status" class="status-badge">✅ Prêt pour la signature</div>
 
     <div class="cgv-box">
       <input type="checkbox" id="check-cgv">
@@ -40,23 +38,25 @@
 
     <div class="btn-group">
       <button id="clear" class="btn-clear" type="button">Effacer</button>
-      <button id="save" class="btn-submit" type="button" disabled>Valider la signature</button>
+      <button id="save" class="btn-submit" type="button">Valider la signature</button>
     </div>
   </div>
 
   <div id="success-view">
     <div style="font-size: 70px; margin-bottom: 15px;">✅</div>
-    <h2 style="font-size: 28px; color:#1e293b; margin-bottom: 10px;">Signature transmise !</h2>
-    <p style="color:#64748b; font-size: 18px;">Votre document a été validé. Vous pouvez fermer cet onglet.</p>
+    <h2 style="font-size: 26px; color:#1e293b; margin-bottom: 10px;">Signature transmise !</h2>
+    <p style="color:#64748b; font-size: 16px;">Votre document a été validé. Vous pouvez fermer cet onglet.</p>
   </div>
 
   <script>
+    // --- IDENTIFIANTS SUPABASE ---
+    const SUPABASE_URL = "https://hfylasnioaiopogoefzy.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mvazV5FACWHVv5Qw0eZIbA_0GF_3MiL";
+
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
-    const statusElem = document.getElementById('conn-status');
     const btnSave = document.getElementById('save');
 
-    // 1. Initialisation Pad (utilisable immédiatement)
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)', minWidth: 2, maxWidth: 4 });
 
@@ -72,76 +72,42 @@
 
     document.getElementById('clear').onclick = () => signaturePad.clear();
 
-    // 2. Configuration WebRTC
-    const PEER_CONFIG = {
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
-    };
-
-    let p2pConnection = null;
-    let isConnected = false;
-
-    function validerConnexionActive() {
-      if (isConnected) return;
-      isConnected = true;
-      statusElem.innerText = "✅ Connecté au PC du club";
-      statusElem.className = "status-badge connected";
-      btnSave.disabled = false;
-    }
-
-    if (!sessionId) {
-      statusElem.innerText = "❌ Session invalide";
-    } else {
-      const peer = new Peer(PEER_CONFIG);
-
-      peer.on('open', () => {
-        // Une seule connexion initiée proprement sans reset
-        p2pConnection = peer.connect('kcm-' + sessionId, { reliable: true });
-
-        // Confirmation directe
-        p2pConnection.on('open', () => {
-          validerConnexionActive();
-        });
-
-        // Confirmation par signal renvoyé par le PC
-        p2pConnection.on('data', (data) => {
-          if (data && data.type === 'HANDSHAKE_OK') {
-            validerConnexionActive();
-          }
-        });
-
-        p2pConnection.on('error', (err) => {
-          console.warn("Erreur DataChannel :", err);
-        });
-      });
-
-      peer.on('error', (err) => {
-        console.warn("Erreur Peer :", err);
-      });
-    }
-
-    // 3. Envoi du tracé
-    btnSave.onclick = () => {
+    btnSave.onclick = async () => {
       if (!document.getElementById('check-cgv').checked) return alert("Veuillez cocher la case d'acceptation.");
       if (signaturePad.isEmpty()) return alert("Veuillez apposer votre signature.");
 
       btnSave.disabled = true;
-      btnSave.innerText = "Envoi...";
+      btnSave.innerText = "Transmission...";
 
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 400;
-      tempCanvas.height = 200;
-      tempCanvas.getContext('2d').drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-      const b64 = tempCanvas.toDataURL("image/png");
+      try {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 400;
+        tempCanvas.height = 200;
+        tempCanvas.getContext('2d').drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+        const b64 = tempCanvas.toDataURL("image/png");
 
-      p2pConnection.send({ type: "SIGNATURE", image: b64 });
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/signatures`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            image_data: b64
+          })
+        });
 
-      document.getElementById('form-container').style.display = 'none';
-      document.getElementById('success-view').style.display = 'block';
+        if (!response.ok) throw new Error("Erreur de transmission HTTP: " + response.status);
+
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+      } catch (err) {
+        alert("Erreur lors de la transmission : " + err.message);
+        btnSave.disabled = false;
+        btnSave.innerText = "Valider la signature";
+      }
     };
   </script>
 </body>
