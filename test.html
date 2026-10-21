@@ -10,52 +10,35 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #f4f6f8;
       color: #000000;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       min-height: 100dvh;
     }
     
-    /* EN-TÊTE ET LOGO KEEPCOOL */
+    /* EN-TÊTE AVEC VOTRE LOGO GITHUB */
     .header-brand {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 0 16px 0;
+      padding: 8px 0 16px 0;
     }
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 3px;
+    .brand-logo {
+      max-width: 190px;
+      height: auto;
+      display: block;
       margin-bottom: 4px;
-    }
-    .logo-text {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: -1.5px;
-      color: #000000;
-      line-height: 1;
-    }
-    .logo-crescent {
-      width: 22px;
-      height: 22px;
-      border: 5px solid #66CC99;
-      border-left-color: transparent;
-      border-radius: 50%;
-      transform: rotate(45deg);
-      display: inline-block;
-      margin-left: 2px;
     }
     .sub-brand {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: #66CC99;
     }
 
-    /* CONTENEUR BLOCS CONTRAT */
+    /* CONTENEUR DES 4 BLOCS */
     .contract-block {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -63,52 +46,42 @@
       border-radius: 8px;
       padding: 14px;
       margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
     }
     .contract-block h4 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       color: #000000;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     
-    /* LIGNES CLÉ / VALEUR */
+    /* LIGNES D'INFORMATIONS DU CONTRAT */
     .info-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
+      align-items: flex-start;
+      padding: 5px 0;
       font-size: 13px;
       border-bottom: 1px dashed #f1f5f9;
+      gap: 12px;
     }
     .info-row:last-child {
       border-bottom: none;
     }
     .info-label {
       color: #64748b;
-      font-weight: 500;
+      font-weight: 600;
+      flex-shrink: 0;
     }
     .info-val {
       color: #000000;
       font-weight: 700;
       text-align: right;
-    }
-    .info-val.highlight {
-      color: #000000;
-      font-size: 14px;
-    }
-    .badge-formule {
-      background: #66CC99;
-      color: #000000;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 800;
-      font-size: 13px;
     }
 
     /* TEXTES LÉGAUX */
@@ -125,7 +98,7 @@
       font-size: 11px;
     }
 
-    /* CASE CGV OFFICIELLE */
+    /* CASE CGV CONTRACTUELLE */
     .cgv-box {
       display: flex;
       align-items: flex-start;
@@ -153,7 +126,7 @@
       cursor: pointer;
     }
 
-    /* MENTION LIEU & DATE */
+    /* LIEU ET DATE */
     .meta-signature {
       font-size: 14px;
       font-weight: 800;
@@ -162,12 +135,12 @@
       margin-bottom: 10px;
     }
     .meta-signature span {
-      color: #000000;
-      border-bottom: 2px solid #66CC99;
-      padding-bottom: 1px;
+      text-decoration: underline;
+      text-decoration-color: #66CC99;
+      text-underline-offset: 3px;
     }
 
-    /* ZONE DE SIGNATURE */
+    /* ZONE DE TRACÉ */
     .canvas-box {
       position: relative;
       width: 100%;
@@ -183,7 +156,7 @@
       touch-action: none;
     }
 
-    /* BOUTONS D'ACTION */
+    /* BOUTONS */
     .btn-group {
       display: flex;
       gap: 10px;
@@ -215,9 +188,6 @@
       opacity: 0.5;
       box-shadow: none;
     }
-    .btn-submit:active {
-      transform: scale(0.98);
-    }
 
     #success-view {
       display: none;
@@ -231,12 +201,9 @@
 <body>
   <div id="form-container">
     
-    <!-- LOGO OFFICIEL KEEPCOOL -->
+    <!-- LOGO OFFICIEL CHARGÉ DEPUIS VOTRE RACINE GITHUB -->
     <div class="header-brand">
-      <div class="logo-container">
-        <span class="logo-text">keepcool</span>
-        <span class="logo-crescent"></span>
-      </div>
+      <img src="logo-keepcool.png" alt="Keepcool" class="brand-logo" onerror="this.style.display='none'">
       <div class="sub-brand">Social Sports Club</div>
     </div>
 
@@ -244,45 +211,49 @@
     <div class="contract-block">
       <h4>👤 L'Adhérent</h4>
       <div class="info-row">
-        <span class="info-label">Nom / Prénom</span>
-        <span class="info-val highlight" id="lbl-nom">-</span>
+        <span class="info-label">Nom / Prénom :</span>
+        <span class="info-val" id="lbl-nom">Chargement...</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Téléphone</span>
+        <span class="info-label">Téléphone :</span>
         <span class="info-val" id="lbl-tel">-</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Email</span>
+        <span class="info-label">Email :</span>
         <span class="info-val" id="lbl-email">-</span>
       </div>
     </div>
 
-    <!-- BLOC 2 : FORMULE SOUSCRITE -->
+    <!-- BLOC 2 : FORMULE SOUSCRITE (ORDRE STRICT DU CONTRAT) -->
     <div class="contract-block">
       <h4>💳 Formule Souscrite</h4>
       <div class="info-row">
-        <span class="info-label">Niveau / Formule</span>
-        <span class="badge-formule" id="lbl-formule">-</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Prélèvement (toutes les 4 sem.)</span>
-        <span class="info-val" id="lbl-tarif">-</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Total initial dû</span>
-        <span class="info-val" id="lbl-total-initial">-</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Date d'effet</span>
+        <span class="info-label">DATE D'EFFET :</span>
         <span class="info-val" id="lbl-effet">-</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Durée & Engagement</span>
+        <span class="info-label">DURÉE :</span>
         <span class="info-val" id="lbl-duree">-</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Préavis de résiliation</span>
+        <span class="info-label">CONDITIONS DE LA FORMULE :</span>
+        <span class="info-val" id="lbl-conditions">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">PRÉAVIS DE RÉSILIATION :</span>
         <span class="info-val" id="lbl-preavis">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">NIVEAU :</span>
+        <span class="info-val" id="lbl-niveau">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">TOTAL INITIAL DÛ :</span>
+        <span class="info-val" id="lbl-total-initial">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">PRÉLÈVEMENT TOUTES LES 4 SEMAINES :</span>
+        <span class="info-val" id="lbl-prelevement">-</span>
       </div>
     </div>
 
@@ -319,7 +290,7 @@
       Etabli à <span id="lbl-club">...</span>, le <span id="lbl-date">...</span>
     </div>
 
-    <!-- CANVAS SIGNATURE -->
+    <!-- ZONE DE SIGNATURE -->
     <div class="canvas-box">
       <canvas id="signature-pad"></canvas>
     </div>
@@ -331,7 +302,6 @@
     </div>
   </div>
 
-  <!-- VUE DE CONFIRMATION -->
   <div id="success-view">
     <div style="font-size: 64px; margin-bottom: 15px;">✅</div>
     <h2 style="font-size: 24px; color:#000000; margin-bottom: 10px;">Signature validée !</h2>
@@ -348,32 +318,40 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
 
-    // 1. Peuplement des informations Adhérent
-    document.getElementById('lbl-nom').innerText = urlParams.get('n') || 'Non renseigné';
-    document.getElementById('lbl-tel').innerText = urlParams.get('t') || 'Non renseigné';
-    document.getElementById('lbl-email').innerText = urlParams.get('e') || 'Non renseigné';
-
-    // 2. Peuplement des informations Formule
-    document.getElementById('lbl-formule').innerText = urlParams.get('f') || 'Prime';
-    document.getElementById('lbl-tarif').innerText = urlParams.get('tarif') || 'Selon contrat';
-    document.getElementById('lbl-total-initial').innerText = urlParams.get('init') || '39,00 €';
-    document.getElementById('lbl-effet').innerText = urlParams.get('eff') || 'Immédiat';
-    document.getElementById('lbl-duree').innerText = urlParams.get('dur') || 'Indéterminée';
-    document.getElementById('lbl-preavis').innerText = urlParams.get('pre') || '4 semaines';
-
-    // 3. Logique Ville Club (Martinique)
-    const rawClub = (urlParams.get('c') || '').toLowerCase();
-    let clubName = "votre club";
-    if (rawClub.includes('ducos')) clubName = 'Ducos';
-    else if (rawClub.includes('fort') || rawClub.includes('fdf')) clubName = 'Fort-de-France';
-    else if (rawClub.includes('robert') || rawClub.includes('creolis')) clubName = 'Le Robert';
-    else if (urlParams.get('c')) clubName = urlParams.get('c');
-    document.getElementById('lbl-club').innerText = clubName;
-
-    // 4. Date du jour
+    // 1. DATE DU JOUR PAR DÉFAUT
     document.getElementById('lbl-date').innerText = new Date().toLocaleDateString('fr-FR');
 
-    // 5. Initialisation Pad Signature
+    // 2. RÉCUPÉRATION DIRECTE DEPUIS SUPABASE (Garantit 100% des données)
+    async function chargerContratDepuisSupabase() {
+      if (!sessionId) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sessions?session_id=eq.${encodeURIComponent(sessionId)}&select=*`, {
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+        const rows = await res.json();
+        if (rows && rows.length > 0) {
+          const d = rows[0];
+          document.getElementById('lbl-nom').innerText = d.nom_adherent || 'Non renseigné';
+          document.getElementById('lbl-tel').innerText = d.tel_adherent || 'Non renseigné';
+          document.getElementById('lbl-email').innerText = d.email_adherent || 'Non renseigné';
+
+          document.getElementById('lbl-effet').innerText = d.date_effet || '-';
+          document.getElementById('lbl-duree').innerText = d.duree || '-';
+          document.getElementById('lbl-conditions').innerText = d.conditions || '-';
+          document.getElementById('lbl-preavis').innerText = d.preavis || '-';
+          document.getElementById('lbl-niveau').innerText = d.niveau || '-';
+          document.getElementById('lbl-total-initial').innerText = d.total_initial || '-';
+          document.getElementById('lbl-prelevement').innerText = d.prelevement || '-';
+
+          document.getElementById('lbl-club').innerText = d.nom_club || 'votre club';
+        }
+      } catch (e) {
+        console.warn("Erreur chargement Supabase:", e);
+      }
+    }
+    chargerContratDepuisSupabase();
+
+    // 3. INITIALISATION DU CANVAS DE SIGNATURE
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)', minWidth: 2, maxWidth: 4 });
 
@@ -389,7 +367,7 @@
 
     document.getElementById('clear').onclick = () => signaturePad.clear();
 
-    // 6. Envoi vers Supabase
+    // 4. ENVOI DU TRACÉ
     const btnSave = document.getElementById('save');
     btnSave.onclick = async () => {
       if (!document.getElementById('check-cgv').checked) {
