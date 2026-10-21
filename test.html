@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Votre Contrat Keepcool</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f1f5f9; padding: 15px; display: flex; flex-direction: column; min-height: 100dvh; }
+    h3 { font-size: 22px; text-align: center; color: #0f172a; margin-bottom: 15px; }
+    
+    /* Blocs Contrat */
+    .contract-block { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .contract-block h4 { font-size: 14px; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .contract-block h4 span { font-size: 16px; }
+    .highlight { font-weight: 800; color: #0284c7; font-size: 15px; margin-bottom: 2px; }
+    .sub-text { font-size: 13px; color: #475569; }
+    .legal-text { font-size: 11px; color: #64748b; text-align: justify; line-height: 1.4; }
+    
+    /* Case CGV */
+    .cgv-box { display: flex; align-items: flex-start; gap: 10px; margin: 15px 0; padding: 12px; background: #e0f2fe; border: 2px solid #bae6fd; border-radius: 8px; }
+    .cgv-box input { width: 24px; height: 24px; accent-color: #0284c7; flex-shrink: 0; margin-top: 2px; }
+    .cgv-box label { font-size: 13px; font-weight: 600; color: #0c4a6e; line-height: 1.3; }
+    
+    /* Mention Date & Club */
+    .signature-meta { font-size: 14px; font-weight: bold; color: #0f172a; text-align: center; margin-bottom: 10px; }
+    .signature-meta span { color: #0284c7; }
+
+    /* Zone de Signature */
+    .canvas-box { position: relative; width: 100%; height: 200px; margin-bottom: 15px; }
+    canvas { width: 100%; height: 100%; border: 3px dashed #cbd5e1; border-radius: 12px; background: #fff; touch-action: none; }
+    
+    /* Boutons */
+    .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    button { padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn-clear { background: #e2e8f0; color: #334155; flex: 1; }
+    .btn-submit { background: #0ea5e9; color: white; flex: 2; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3); transition: opacity 0.2s; }
+    .btn-submit:disabled { opacity: 0.5; box-shadow: none; }
+    
+    #success-view { display: none; text-align: center; margin: auto; padding: 20px; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+</head>
+<body>
+  <div id="form-container">
+    <h3>Votre Contrat Keepcool</h3>
+    
+    <div class="contract-block">
+      <h4><span>👤</span> Adhérent</h4>
+      <div class="highlight" id="lbl-nom">-</div>
+      <div class="sub-text" id="lbl-contact">-</div>
+    </div>
+
+    <div class="contract-block">
+      <h4><span>💳</span> Formule souscrite</h4>
+      <div class="highlight" id="lbl-formule">Voir détails sur le contrat PDF</div>
+    </div>
+
+    <div class="contract-block">
+      <h4><span>🩺</span> Certificat médical</h4>
+      <div class="legal-text">Une consultation médicale préalable à toute activité sportive est indispensable pour détecter d'éventuelles contre-indications à la pratique du sport. KEEP COOL recommande de consulter un médecin avant toute activité physique, et de lui faire établir un certificat de non contre indication à la pratique du sport à renouveler chaque année. La remise d'un tel certificat au club n'étant pas une obligation légale, elle est laissée à la discrétion de l'adhérent.<br><br><strong style="color:#334155;">J'ai pris connaissance de cette recommandation et décharge KEEP COOL de toute responsabilité quant à la survenue d'un accident lié à mon état de santé.</strong></div>
+    </div>
+
+    <div class="contract-block">
+      <h4><span>🏦</span> Mandat de Prélèvement SEPA</h4>
+      <div class="legal-text">L'Adhérent autorise KEEP COOL à envoyer des instructions à sa banque pour débiter son compte, et sa banque à débiter son compte conformément à ces instructions. Il bénéficie du droit d'être remboursé par sa banque dans un délai de huit semaines suivant la date du débit.<br><br><em>Vos droits concernant le présent mandat sont expliqués dans un document disponible auprès de votre banque.</em></div>
+    </div>
+
+    <div class="cgv-box">
+      <input type="checkbox" id="check-cgv">
+      <label for="check-cgv">J'ai lu et j'accepte ce contrat, le mandat de prélèvement, ainsi que les conditions générales d'adhésion au verso.</label>
+    </div>
+
+    <div class="signature-meta">
+      Etabli à <span id="lbl-club">...</span>, le <span id="lbl-date">...</span>
+    </div>
+
+    <div class="canvas-box">
+      <canvas id="signature-pad"></canvas>
+    </div>
+
+    <div class="btn-group">
+      <button id="clear" class="btn-clear" type="button">Effacer</button>
+      <button id="save" class="btn-submit" type="button">Valider la signature</button>
+    </div>
+  </div>
+
+  <div id="success-view">
+    <div style="font-size: 70px; margin-bottom: 15px;">✅</div>
+    <h2 style="font-size: 26px; color:#1e293b; margin-bottom: 10px;">Signature validée !</h2>
+    <p style="color:#64748b; font-size: 16px;">Votre contrat a bien été signé. Vous pouvez remettre la tablette ou fermer cette page sur votre téléphone.</p>
+  </div>
+
+  <script>
+    // --- VOS IDENTIFIANTS SUPABASE (À conserver tels quels) ---
+    const SUPABASE_URL = "https://hfylasnioaiopogoefzy.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mvazV5FACWHVv5Qw0eZIbA_0GF_3MiL";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    
+    // --- LECTURE DES DONNÉES INJECTÉES DANS L'URL ---
+    document.getElementById('lbl-nom').innerText = urlParams.get('n') || 'Adhérent';
+    
+    const email = urlParams.get('e') || '';
+    const tel = urlParams.get('t') || '';
+    const contactStr = [tel, email].filter(Boolean).join(' • ');
+    document.getElementById('lbl-contact').innerText = contactStr || 'Aucun contact renseigné';
+
+    const formule = urlParams.get('f');
+    if (formule) document.getElementById('lbl-formule').innerText = formule;
+
+    // Logique automatique pour le nom du Club
+    const rawClub = urlParams.get('c') || '';
+    let clubName = "votre club";
+    const cl = rawClub.toLowerCase();
+    if (cl.includes('fdf') || cl.includes('fort')) clubName = 'Fort-de-France';
+    else if (cl.includes('ducos')) clubName = 'Ducos';
+    else if (cl.includes('robert')) clubName = 'Le Robert';
+    else if (rawClub) clubName = rawClub;
+    document.getElementById('lbl-club').innerText = clubName;
+    
+    // Date du jour
+    const today = new Date();
+    document.getElementById('lbl-date').innerText = today.toLocaleDateString('fr-FR');
+
+    // --- GESTION DU TRACÉ ---
+    const canvas = document.getElementById('signature-pad');
+    const signaturePad = new SignaturePad(canvas, { penColor: 'rgb(15, 23, 42)', minWidth: 2, maxWidth: 4 });
+
+    function resize() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      signaturePad.clear();
+    }
+    window.addEventListener("resize", resize);
+    setTimeout(resize, 150);
+
+    document.getElementById('clear').onclick = () => signaturePad.clear();
+
+    // --- ENVOI A SUPABASE ---
+    const btnSave = document.getElementById('save');
+    btnSave.onclick = async () => {
+      if (!document.getElementById('check-cgv').checked) return alert("Veuillez cocher la case d'acceptation du contrat.");
+      if (signaturePad.isEmpty()) return alert("Veuillez apposer votre signature dans le cadre.");
+
+      btnSave.disabled = true;
+      btnSave.innerText = "Transmission en cours...";
+
+      try {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 400;
+        tempCanvas.height = 200;
+        tempCanvas.getContext('2d').drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+        const b64 = tempCanvas.toDataURL("image/png");
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/signatures`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            image_data: b64
+          })
+        });
+
+        if (!response.ok) throw new Error("Erreur de transmission");
+
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+      } catch (err) {
+        alert("Erreur réseau. Veuillez réessayer.");
+        btnSave.disabled = false;
+        btnSave.innerText = "Valider la signature";
+      }
+    };
+  </script>
+</body>
+</html>
