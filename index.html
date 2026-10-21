@@ -73,27 +73,11 @@
     document.getElementById('clear').onclick = () => signaturePad.clear();
 
     // 2. Configuration WebRTC
-    // Configuration WebRTC Hybride (LAN + 4G + Relais TURN anti-isolation Wi-Fi)
     const PEER_CONFIG = {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          {
-            urls: 'turn:global.relay.metered.ca:80',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-          },
-          {
-            urls: 'turn:global.relay.metered.ca:443',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-          },
-          {
-            urls: 'turn:global.relay.metered.ca:443?transport=tcp',
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-          }
+          { urls: 'stun:stun1.l.google.com:19302' }
         ]
       }
     };
