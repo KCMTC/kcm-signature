@@ -16,7 +16,7 @@
       min-height: 100dvh;
     }
     
-    /* EN-TÊTE AVEC VOTRE LOGO GITHUB */
+    /* EN-TÊTE LOGO */
     .header-brand {
       display: flex;
       flex-direction: column;
@@ -38,7 +38,7 @@
       color: #66CC99;
     }
 
-    /* CONTENEUR DES 4 BLOCS */
+    /* CONTENEUR DE BLOC */
     .contract-block {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -59,8 +59,32 @@
       align-items: center;
       gap: 6px;
     }
+
+    /* STYLE DU BLOC ADHÉRENT */
+    .adh-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+    .adh-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 2px;
+    }
+    .adh-line {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.4;
+    }
     
-    /* LIGNES D'INFORMATIONS DU CONTRAT */
+    /* LIGNES D'INFORMATIONS FORMULE */
     .info-row {
       display: flex;
       justify-content: space-between;
@@ -140,7 +164,7 @@
       text-underline-offset: 3px;
     }
 
-    /* ZONE DE TRACÉ */
+    /* ZONE DE SIGNATURE */
     .canvas-box {
       position: relative;
       width: 100%;
@@ -201,30 +225,21 @@
 <body>
   <div id="form-container">
     
-    <!-- LOGO OFFICIEL CHARGÉ DEPUIS VOTRE RACINE GITHUB -->
+    <!-- EN-TÊTE KEEPCOOL -->
     <div class="header-brand">
       <img src="logo-keepcool.png" alt="Keepcool" class="brand-logo" onerror="this.style.display='none'">
       <div class="sub-brand">Social Sports Club</div>
     </div>
 
-    <!-- BLOC 1 : ADHÉRENT -->
+    <!-- BLOC 1 : ADHÉRENT (LIGNES EXTRAITES DU CONTRAT) -->
     <div class="contract-block">
       <h4>👤 L'Adhérent</h4>
-      <div class="info-row">
-        <span class="info-label">Nom / Prénom :</span>
-        <span class="info-val" id="lbl-nom">Chargement...</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Téléphone :</span>
-        <span class="info-val" id="lbl-tel">-</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Email :</span>
-        <span class="info-val" id="lbl-email">-</span>
+      <div class="adh-box" id="adh-content">
+        <div class="adh-name">Chargement...</div>
       </div>
     </div>
 
-    <!-- BLOC 2 : FORMULE SOUSCRITE (ORDRE STRICT DU CONTRAT) -->
+    <!-- BLOC 2 : FORMULE SOUSCRITE -->
     <div class="contract-block">
       <h4>💳 Formule Souscrite</h4>
       <div class="info-row">
@@ -318,10 +333,8 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
 
-    // 1. DATE DU JOUR PAR DÉFAUT
     document.getElementById('lbl-date').innerText = new Date().toLocaleDateString('fr-FR');
 
-    // 2. RÉCUPÉRATION DIRECTE DEPUIS SUPABASE (Garantit 100% des données)
     async function chargerContratDepuisSupabase() {
       if (!sessionId) return;
       try {
@@ -331,9 +344,25 @@
         const rows = await res.json();
         if (rows && rows.length > 0) {
           const d = rows[0];
-          document.getElementById('lbl-nom').innerText = d.nom_adherent || 'Non renseigné';
-          document.getElementById('lbl-tel').innerText = d.tel_adherent || 'Non renseigné';
-          document.getElementById('lbl-email').innerText = d.email_adherent || 'Non renseigné';
+
+          // Affichage dynamique fidèle des lignes du bloc Adhérent
+          const adhBox = document.getElementById('adh-content');
+          if (d.lignes_adherent) {
+            const lines = d.lignes_adherent.split('\n').filter(Boolean);
+            adhBox.innerHTML = '';
+            lines.forEach((line, index) => {
+              const div = document.createElement('div');
+              div.className = (index === 0) ? 'adh-name' : 'adh-line';
+              div.innerText = line;
+              adhBox.appendChild(div);
+            });
+          } else {
+            adhBox.innerHTML = `
+              <div class="adh-name">${d.nom_adherent || 'Adhérent'}</div>
+              <div class="adh-line">Téléphone : ${d.tel_adherent || 'Non renseigné'}</div>
+              <div class="adh-line">Email : ${d.email_adherent || 'Non renseigné'}</div>
+            `;
+          }
 
           document.getElementById('lbl-effet').innerText = d.date_effet || '-';
           document.getElementById('lbl-duree').innerText = d.duree || '-';
@@ -351,7 +380,6 @@
     }
     chargerContratDepuisSupabase();
 
-    // 3. INITIALISATION DU CANVAS DE SIGNATURE
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)', minWidth: 2, maxWidth: 4 });
 
@@ -367,7 +395,6 @@
 
     document.getElementById('clear').onclick = () => signaturePad.clear();
 
-    // 4. ENVOI DU TRACÉ
     const btnSave = document.getElementById('save');
     btnSave.onclick = async () => {
       if (!document.getElementById('check-cgv').checked) {
