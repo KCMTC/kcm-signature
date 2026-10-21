@@ -8,7 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #ffffff; padding: 20px; display: flex; flex-direction: column; height: 100dvh; }
     h3 { font-size: 26px; text-align: center; color: #1e293b; margin-bottom: 12px; }
-    .status-badge { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 8px; background: #e0f2fe; color: #0369a1; }
+    .status-badge { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 8px; background: #e0f2fe; color: #0369a1; transition: all 0.3s; }
     .status-badge.connected { background: #dcfce7; color: #15803d; }
     .cgv-box { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; line-height: 1.3; }
     .cgv-box input { width: 30px; height: 30px; accent-color: #00E676; flex-shrink: 0; }
@@ -27,7 +27,7 @@
 <body>
   <div id="form-container" style="display:flex; flex-direction:column; height:100%;">
     <h3>Signature du Contrat</h3>
-    <div id="conn-status" class="status-badge">⏳ Connexion au PC d'accueil en cours...</div>
+    <div id="conn-status" class="status-badge">⏳ Recherche du PC d'accueil...</div>
 
     <div class="cgv-box">
       <input type="checkbox" id="check-cgv">
@@ -56,7 +56,7 @@
     const statusElem = document.getElementById('conn-status');
     const btnSave = document.getElementById('save');
 
-    // 1. Initialisation Pad de signature
+    // 1. Initialisation Pad
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, { penColor: 'rgb(0, 0, 0)', minWidth: 2, maxWidth: 4 });
 
@@ -72,29 +72,82 @@
 
     document.getElementById('clear').onclick = () => signaturePad.clear();
 
-    // 2. Connexion WebRTC directe au PC
-    let p2pConnection = null;
-    const peer = new Peer();
-
-    peer.on('open', () => {
-      if (!sessionId) {
-        statusElem.innerText = "❌ Session invalide";
-        return;
+    // 2. CONFIGURATION SERVEURS STUN / TURN (Bypass pare-feu 4G / Wi-Fi)
+    const PEER_CONFIG = {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun.relay.metered.ca:80' },
+          {
+            urls: 'turn:global.relay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:global.relay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:global.relay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          }
+        ]
       }
-      p2pConnection = peer.connect('kcm-' + sessionId, { reliable: true });
+    };
 
-      p2pConnection.on('open', () => {
-        statusElem.innerText = "✅ Connecté au PC du club";
-        statusElem.className = "status-badge connected";
-        btnSave.disabled = false;
+    let p2pConnection = null;
+    let peer = null;
+    let retryInterval = null;
+
+    if (!sessionId) {
+      statusElem.innerText = "❌ Session invalide";
+    } else {
+      peer = new Peer(PEER_CONFIG);
+
+      peer.on('open', () => {
+        statusElem.innerText = "⏳ Connexion au PC d'accueil...";
+        tenterLiaison();
+
+        // Réessaie toutes les 2,5 secondes tant que la connexion n'est pas ouverte
+        retryInterval = setInterval(() => {
+          if (!p2pConnection || !p2pConnection.open) {
+            tenterLiaison();
+          } else {
+            clearInterval(retryInterval);
+          }
+        }, 2500);
       });
 
-      p2pConnection.on('error', () => {
-        statusElem.innerText = "⚠️ Erreur de liaison avec le PC";
+      peer.on('error', (err) => {
+        console.warn("Peer error:", err);
       });
-    });
+    }
 
-    // 3. Envoi direct P2P de la signature
+    function tenterLiaison() {
+      if (p2pConnection && p2pConnection.open) return;
+
+      try {
+        p2pConnection = peer.connect('kcm-' + sessionId, { reliable: true });
+
+        p2pConnection.on('open', () => {
+          clearInterval(retryInterval);
+          statusElem.innerText = "✅ Connecté au PC du club";
+          statusElem.className = "status-badge connected";
+          btnSave.disabled = false;
+        });
+
+        p2pConnection.on('close', () => {
+          btnSave.disabled = true;
+          statusElem.innerText = "⚠️ Liaison perdue, reconnexion...";
+          statusElem.className = "status-badge";
+        });
+      } catch (e) {}
+    }
+
+    // 3. Envoi du tracé
     btnSave.onclick = () => {
       if (!document.getElementById('check-cgv').checked) return alert("Veuillez cocher la case d'acceptation.");
       if (signaturePad.isEmpty()) return alert("Veuillez apposer votre signature.");
