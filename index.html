@@ -372,7 +372,15 @@
           document.getElementById('lbl-total-initial').innerText = d.total_initial || '-';
           document.getElementById('lbl-prelevement').innerText = d.prelevement || '-';
 
-          document.getElementById('lbl-club').innerText = d.nom_club || 'votre club';
+          // Normalisation du nom de la ville pour "Etabli à ..."
+          const rawClub = (d.nom_club || '').toUpperCase();
+          let nomVille = "votre club";
+          if (rawClub.includes('DUCOS')) nomVille = 'Ducos';
+          else if (rawClub.includes('ROBERT')) nomVille = 'Le Robert';
+          else if (rawClub.includes('FORT') || rawClub.includes('FDF')) nomVille = 'Fort-de-France';
+          else if (d.nom_club) nomVille = d.nom_club;
+
+          document.getElementById('lbl-club').innerText = nomVille;
         }
       } catch (e) {
         console.warn("Erreur chargement Supabase:", e);
